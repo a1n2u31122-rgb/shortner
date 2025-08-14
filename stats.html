@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Stats for {{ url.short_code }} | Short.ly{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        background-color: white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    
+    .qr-code {
+        background: white;
+        padding: 1rem;
+        border-radius: 15px;
+        display: inline-block;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card url-card mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0">Stats for <span class="short-url">{{ url.short_code }}</span></h1>
+            <a href="{% url 'home' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Back to home
+            </a>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="stat-card">
+                    <h3><i class="fas fa-link me-2"></i>URL Information</h3>
+                    <hr>
+                    <p><strong>Original URL:</strong> <a href="{{ url.original_url }}" target="_blank">{{ url.original_url }}</a></p>
+                    <p><strong>Short URL:</strong> <a href="{% url 'redirect' url.short_code %}" target="_blank" class="short-url">
+                        {{ request.scheme }}://{{ request.get_host }}/{{ url.short_code }}
+                    </a></p>
+                    <p><strong>Created:</strong> {{ url.created_at|date:"F j, Y g:i a" }}</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><i class="fas fa-chart-line me-2"></i>Performance</h3>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-md-6">
+                            <div class="stat-value">{{ url.visit_count }}</div>
+                            <p class="text-muted">Total Visits</p>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-value">
+                                {% if url.last_visited %}
+                                    {{ url.last_visited|date:"M j" }}
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </div>
+                            <p class="text-muted">Last Visited</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="stat-card text-center">
+                    <h3><i class="fas fa-qrcode me-2"></i>QR Code</h3>
+                    <hr>
+                    <div class="qr-code mb-3">
+                        <!-- Placeholder for QR code -->
+                        <i class="fas fa-qrcode" style="font-size: 10rem; color: #eee;"></i>
+                    </div>
+                    <p>Scan this QR code to visit your shortened URL</p>
+                    <button class="btn btn-outline-primary w-100">
+                        <i class="fas fa-download me-2"></i>Download QR Code
+                    </button>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><i class="fas fa-share-alt me-2"></i>Share</h3>
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fab fa-facebook"></i>
+                        </button>
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fab fa-linkedin"></i>
+                        </button>
+                    </div>
+                    <div class="input-group mt-3">
+                        <input type="text" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}/{{ url.short_code }}" readonly>
+                        <button class="btn btn-primary" id="copy-btn">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Copy URL functionality
+    document.getElementById('copy-btn').addEventListener('click', function() {
+        const urlInput = document.querySelector('.input-group input');
+        urlInput.select();
+        document.execCommand('copy');
+        
+        // Change button text temporarily
+        const originalHTML = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => {
+            this.innerHTML = originalHTML;
+        }, 2000);
+    });
+</script>
+{% endblock %}

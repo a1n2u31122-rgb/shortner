@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-4">Shorten Your Links, Amplify Your Reach</h1>
+            <p class="lead mb-4">Create short, memorable URLs and track their performance with our powerful analytics.</p>
+            <div class="d-flex gap-2">
+                <a href="#url-form" class="btn btn-light btn-lg">Get Started</a>
+                <a href="#features" class="btn btn-outline-light btn-lg">Learn More</a>
+            </div>
+        </div>
+        <div class="col-lg-6 d-none d-lg-block">
+            <img src="https://illustrations.popsy.co/amber/digital-nomad.svg" alt="URL Shortener Illustration" class="img-fluid">
+        </div>
+    </div>
+</section>
+
+<!-- URL Shortener Form -->
+<div id="url-form" class="card url-card mb-5">
+    <div class="card-body p-4">
+        <h2 class="mb-4 text-center"><i class="fas fa-link me-2"></i>Shorten a URL</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="original_url" class="form-label">Enter your long URL</label>
+                <input type="url" class="form-control form-control-lg" id="original_url" name="original_url" 
+                       placeholder="https://example.com/very/long/url" required>
+            </div>
+            <div class="mb-3">
+                <label for="custom_code" class="form-label">Custom short code (optional)</label>
+                <div class="input-group">
+                    <span class="input-group-text">{{ request.scheme }}://{{ request.get_host }}/</span>
+                    <input type="text" class="form-control form-control-lg" id="custom_code" name="custom_code" 
+                           placeholder="my-custom-link">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100">
+                <i class="fas fa-rocket me-2"></i>Shorten URL
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Recent URLs -->
+{% if recent_urls %}
+<div class="card url-card mb-5">
+    <div class="card-body p-4">
+        <h2 class="mb-4"><i class="fas fa-history me-2"></i>Recently Shortened URLs</h2>
+        <div class="list-group">
+            {% for url in recent_urls %}
+            <div class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <div>
+                        <h5 class="mb-1">
+                            <a href="{% url 'redirect' url.short_code %}" target="_blank" class="short-url">
+                                {{ request.scheme }}://{{ request.get_host }}/{{ url.short_code }}
+                            </a>
+                        </h5>
+                        <p class="mb-1 text-truncate">{{ url.original_url }}</p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge stats-badge rounded-pill">
+                            <i class="fas fa-chart-line me-1"></i>{{ url.visit_count }} visits
+                        </span>
+                    </div>
+                </div>
+                <div class="d-flex w-100 justify-content-between mt-2">
+                    <div>
+                        <small class="text-muted">
+                            Created {{ url.created_at|timesince }} ago
+                            {% if url.last_visited %} | Last visited {{ url.last_visited|timesince }} ago{% endif %}
+                        </small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'stats' url.short_code %}" class="text-decoration-none">
+                            <small class="text-primary">View stats <i class="fas fa-arrow-right"></i></small>
+                        </a>
+                        <form method="POST" action="{% url 'delete_url' url.short_code %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                    onclick="return confirm('Are you sure you want to delete this URL?')">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+<!-- Features Section -->
+<section id="features" class="mb-5">
+    <h2 class="text-center mb-5">Why Choose Short.ly?</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card url-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Lightning Fast</h3>
+                    <p>Our servers deliver instant redirects with 99.9% uptime guarantee.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card url-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>Powerful Analytics</h3>
+                    <p>Track clicks, geographic data, and referral sources for all your links.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card url-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Secure & Reliable</h3>
+                    <p>All links are encrypted and protected against malicious activity.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="card url-card">
+    <div class="card-body p-4">
+        <h2 class="text-center mb-4">About Short.ly</h2>
+        <p class="text-center lead">Short.ly is a free URL shortening service that helps you create memorable, trackable links for your business, social media, or personal use.</p>
+        <div class="row mt-4">
+            <div class="col-lg-6">
+                <h4><i class="fas fa-check-circle text-primary me-2"></i>Our Mission</h4>
+                <p>To simplify link sharing while providing valuable insights into link performance.</p>
+            </div>
+            <div class="col-lg-6">
+                <h4><i class="fas fa-users text-primary me-2"></i>Who Uses Short.ly?</h4>
+                <p>Marketers, bloggers, social media managers, and anyone who shares links online.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
